@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f1c40f">
+    <meta name="description" content="Animal Game - Projeto acadêmico de jogo do bicho">
+    <link rel="manifest" href="manifest.json">
+    <title>Animal Game</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="alternate icon" type="image/png" href="favicon.svg">
+    <link rel="apple-touch-icon" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.0/dist/confetti.browser.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+  
+</head>
+<body class="tema-escuro">
+    <!-- ===== AVISO LEGAL INICIAL ===== -->
+<div id="modal-aviso-legal" class="modal-overlay">
+    <div class="modal-box" style="max-width:520px;border-top-color:#e74c3c;">
+        <span class="modal-icone" style="animation:none;">⚠️</span>
+        <h2 style="color:#c0392b;">AVISO LEGAL</h2>
+        <p style="text-align:left;font-size:13px;line-height:1.6;">
+            Este site é um <strong>projeto acadêmico</strong> de estudo de programação web.<br><br>
+            <strong>NÃO É UM SITE DE APOSTAS REAIS.</strong><br><br>
+            Não envolve dinheiro, não incentiva apostas reais e não deve ser usado para qualquer tipo de aposta.<br><br>
+            Todas as "moedas" são <strong>fictícias</strong> e não têm valor real.<br><br>
+            Projeto <strong>sem fins lucrativos</strong>.
+        </p>
+        <div class="modal-botoes" style="margin-top:20px;">
+            <button class="gold" onclick="aceitarAvisoLegal()">✅ Entendi e aceito</button>
+        </div>
+    </div>
+</div>
+     
+    <!-- ✅ FUNDO COM ANIMAIS -->
+<div class="fundo-animais" aria-hidden="true">
+    <span class="animal-bg">🦁</span>
+    <span class="animal-bg">🐯</span>
+    <span class="animal-bg">🐘</span>
+    <span class="animal-bg">🦅</span>
+    <span class="animal-bg">🐍</span>
+    <span class="animal-bg">🦋</span>
+    <span class="animal-bg">🐶</span>
+    <span class="animal-bg">🐱</span>
+    <span class="animal-bg">🐰</span>
+    <span class="animal-bg">🐻</span>
+    <span class="animal-bg">🦊</span>
+    <span class="animal-bg">🐸</span>
+</div>
+
+    <!-- ===== RELÓGIO FLUTUANTE ===== -->
+    <div class="relogio-animal">
+        <span class="icone-relogio-animal">⏰</span>
+        <span id="relogio-hora">00:00:00</span>
+    </div>
+    <!-- ===== BOTÃO DE TEMA FLUTUANTE ===== -->
+<div class="tema-flutuante" onclick="toggleTema()" title="Alternar tema">
+    <span id="icone-tema-flutuante">🌙</span>
+</div>
+
+    <!-- ===== NOTIFICAÇÕES ===== -->
+    <div id="notificacoes-container" class="notificacoes-container"></div>
+
+    <!-- ===== MODAL DE CONFIRMAÇÃO ===== -->
+    <div id="modal-confirmacao" class="modal-overlay hidden">
+        <div class="modal-box">
+            <span class="modal-icone" id="modal-icone">⚠️</span>
+            <h2 id="modal-titulo">Confirmar?</h2>
+            <p id="modal-texto">Tem certeza que deseja fazer isso?</p>
+            <div class="modal-detalhes hidden" id="modal-detalhes"></div>
+            <div class="modal-botoes">
+                <button class="danger" onclick="confirmarModal()" data-i18n="modal_confirmar">✅ Sim, confirmar</button>
+                <button class="secondary" onclick="fecharModal()" data-i18n="modal_cancelar">❌ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL DE SORTEIO AO VIVO ===== -->
+    <div id="modal-sorteio" class="modal-overlay hidden">
+        <div class="modal-box modal-sorteio-box">
+            <h2>🎰 Sorteando...</h2>
+            <div class="slot-container">
+                <div class="slot" id="slot-bicho">??</div>
+                <div class="slot milhar-slot" id="slot-milhar">????</div>
+            </div>
+            <div class="slot-bicho-nome" id="slot-bicho-nome"></div>
+            <p class="sorteio-turno-info" id="sorteio-turno-info"></p>
+        </div>
+    </div>
+
+    <!-- ===== MODAL DE RESULTADO ===== -->
+    <div id="modal-resultado" class="modal-overlay hidden">
+        <div class="modal-box modal-resultado-box" id="modal-resultado-box">
+            <span class="modal-icone-grande" id="resultado-icone">🎉</span>
+            <h2 id="resultado-titulo">Resultado</h2>
+            <div class="resultado-detalhes" id="resultado-detalhes"></div>
+            <div class="recompensa-moedas hidden" id="resultado-recompensa"></div>
+            <div class="modal-botoes">
+                <button class="gold" onclick="fecharResultado()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== LOJA ===== -->
+    <div id="modal-loja" class="modal-overlay hidden">
+        <div class="modal-box modal-loja-box">
+            <div class="painel-header">
+                <h2>🏪 Loja de Itens</h2>
+                <button class="danger small" onclick="fecharLoja()">✖ Fechar</button>
+            </div>
+            <p style="text-align: center; color: #888; font-size: 13px;">Gaste suas moedas em itens especiais</p>
+            <div class="loja-moedas-info">
+                <span>Suas moedas: 🪙 <strong id="loja-moedas">0</strong></span>
+            </div>
+            <div class="loja-grid" id="loja-grid"></div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL DE PERFIL ===== -->
+    <div id="modal-perfil" class="modal-overlay hidden">
+        <div class="modal-box modal-perfil-box">
+            <div class="painel-header">
+                <h2>👤 Perfil</h2>
+                <button class="danger small" onclick="fecharPerfil()">✖ Fechar</button>
+            </div>
+            <div id="perfil-conteudo"></div>
+        </div>
+    </div>
+
+    <!-- ===== MISSÕES ===== -->
+    <div id="modal-missoes" class="modal-overlay hidden">
+        <div class="modal-box modal-missoes-box">
+            <div class="painel-header">
+                <h2>🎯 Missões Diárias</h2>
+                <button class="danger small" onclick="fecharMissoes()">✖ Fechar</button>
+            </div>
+            <div id="missoes-lista"></div>
+        </div>
+    </div>
+
+    <!-- ===== CONQUISTAS ===== -->
+    <div id="modal-conquistas" class="modal-overlay hidden">
+        <div class="modal-box modal-conquistas-box">
+            <div class="painel-header">
+                <h2>🏅 Conquistas</h2>
+                <button class="danger small" onclick="fecharConquistas()">✖ Fechar</button>
+            </div>
+            <div id="conquistas-lista"></div>
+        </div>
+    </div>
+        <!-- ===== MODAL DE TROCAR AVATAR ===== -->
+    <div id="modal-trocar-avatar" class="modal-overlay hidden">
+        <div class="modal-box" style="max-width:520px;border-top-color:#f1c40f;">
+            <div class="painel-header">
+                <h2>🎭 Trocar Avatar</h2>
+                <button class="danger small" onclick="fecharTrocarAvatar()">✖ Fechar</button>
+            </div>
+            <p style="text-align:center;font-size:13px;color:#888;margin-bottom:15px;">
+                Escolha um novo avatar para o seu perfil:
+            </p>
+            <div class="avatares-grid" id="avatares-trocar-grid"></div>
+            <div class="modal-botoes" style="margin-top:20px;">
+                <button class="secondary" onclick="fecharTrocarAvatar()">❌ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- ===== TELA LOGIN ===== -->
+        <div id="tela-login" class="tela-inicial">
+            <span class="emoji-flutuante">🦁</span>
+            <span class="emoji-flutuante">🐯</span>
+            <span class="emoji-flutuante">🐘</span>
+            <span class="emoji-flutuante">🦅</span>
+            <span class="emoji-flutuante">🐍</span>
+            <span class="emoji-flutuante">🦋</span>
+
+            <h1 class="titulo-principal" data-i18n="titulo_app">Animal Game</h1>
+            <p class="subtitulo">
+                <span class="emoji-linha">🎲</span>
+                <span data-i18n="subtitulo_app">Escolha • Aposte • Sorteie</span>
+                <span class="emoji-linha">🍀</span>
+            </p>
+
+            <div class="tema-toggle-container">
+                <button class="tema-toggle" onclick="abrirSeletorIdioma()" title="Idioma / Language" style="margin-right: 8px;">
+                    <span id="btn-idioma-login">🇧🇷</span>
+                </button>
+              <!--  <button class="tema-toggle" onclick="toggleTema()" title="Alternar tema">
+                    <span id="icone-tema">🌙</span>
+                </button> -->
+            </div>
+
+            <h2 class="titulo-form" data-i18n="entrar">🔐 Entrar</h2>
+<div id="mensagem-login" class="mensagem-auth hidden"></div>
+
+<!-- ✅ DROPDOWN DE CONTAS SALVAS -->
+<div id="contas-salvas-box" class="contas-salvas-box hidden">
+    <label class="contas-salvas-label">👥 Contas salvas (clique para entrar):</label>
+    <div id="lista-contas-salvas" class="lista-contas-salvas"></div>
+</div>
+
+<div class="form-group">
+    <label data-i18n="nickname">👤 Nickname</label>
+    <input type="text" id="login-nickname" data-i18n-placeholder="placeholder_nickname" placeholder="Seu nickname" maxlength="20" autocomplete="username">
+</div>
+<div class="form-group">
+    <label data-i18n="senha">🔑 Senha (8 números)</label>
+    <input type="password" id="login-senha" placeholder="00000000" maxlength="8" inputmode="numeric" autocomplete="current-password">
+</div>
+
+<!-- ✅ CHECKBOX MANTER CONECTADO -->
+<div class="manter-conectado-container">
+    <label class="manter-conectado-label">
+        <input type="checkbox" id="manter-conectado">
+        <span>💾 Manter conectado</span>
+    </label>
+</div>
+
+<button onclick="fazerLogin()" data-i18n="btn_entrar">Entrar 🔓</button>
+            <br>
+            <div class="links-container">
+                <span class="link-trocar" onclick="mostrarRegistro()" data-i18n="sem_conta">Não tem conta? Cadastre-se</span>
+                <span class="link-trocar" onclick="mostrarRecuperarSenha()" data-i18n="esqueci_senha">🔑 Esqueci minha senha</span>
+            </div>
+            <br>
+            <button class="btn-sobre-inicial" onclick="mostrarSobre()" data-i18n="sobre_jogo">ℹ️ Sobre o Jogo</button>
+            <br>
+            <button class="btn-sobre-inicial" onclick="mostrarRankingLogin()" data-i18n="ver_ranking">🏆 Ver Ranking</button>
+        </div>
+
+        <!-- ===== TELA REGISTRO ===== -->
+        <div id="tela-registro" class="tela-inicial hidden">
+            <span class="emoji-flutuante">🦁</span>
+            <span class="emoji-flutuante">🐯</span>
+            <span class="emoji-flutuante">🐘</span>
+            <span class="emoji-flutuante">🦅</span>
+            <span class="emoji-flutuante">🐍</span>
+            <span class="emoji-flutuante">🦋</span>
+
+            <h1 class="titulo-principal" data-i18n="titulo_app">Animal Game</h1>
+            <p class="subtitulo" data-i18n="cadastro">📝 Cadastro</p>
+            <div id="mensagem-registro" class="mensagem-auth hidden"></div>
+
+            <div class="form-group">
+                <label data-i18n="nickname_label">👤 Nickname (único, 2-20)</label>
+                <input type="text" id="registro-nickname" data-i18n-placeholder="placeholder_nickname" placeholder="Seu apelido" maxlength="20">
+            </div>
+            <div class="form-group">
+                <label data-i18n="email_label">📧 E-mail real</label>
+                <input type="email" id="registro-email" data-i18n-placeholder="placeholder_email" placeholder="seu@email.com">
+            </div>
+            <div class="form-group">
+                <label data-i18n="senha_label">🔑 Senha (8 números)</label>
+                <input type="password" id="registro-senha" placeholder="00000000" maxlength="8" inputmode="numeric">
+            </div>
+            <div class="form-group">
+                <label data-i18n="avatar_label">🎭 Escolha seu avatar</label>
+                <div class="avatares-grid" id="avatares-grid"></div>
+            </div>
+
+
+            <!-- ✅ CONSENTIMENTO LGPD -->
+                <div class="consentimento-lgpd">
+                    <label>
+                        <input type="checkbox" id="aceitar-lgpd-cadastro">
+                        <span>Li e aceito a <a href="#" onclick="event.preventDefault(); abrirLGPD();" style="color:#f1c40f;">Política de Privacidade (LGPD)</a> e os <a href="#" onclick="event.preventDefault(); abrirTermos();" style="color:#f1c40f;">Termos de Uso</a>.</span>
+                    </label>
+                </div>
+            <!--FIM DO LGPD-->
+            <button onclick="fazerRegistro()" data-i18n="btn_cadastrar">Cadastrar ✅</button>
+            <br>
+            <span class="link-trocar" onclick="mostrarLogin()" data-i18n="ja_tem_conta">Já tem conta? Faça login</span>
+        </div>
+
+        <!-- ===== TELA RECUPERAR SENHA ===== -->
+        <div id="tela-recuperar" class="tela-inicial hidden">
+            <h1 class="titulo-principal" data-i18n="titulo_app">Animal Game</h1>
+            <p class="subtitulo" data-i18n="recuperar_senha">🔑 Recuperar Senha</p>
+            <div id="mensagem-recuperar" class="mensagem-auth hidden"></div>
+            <p class="texto-informativo" data-i18n="digite_email">Digite o e-mail cadastrado na sua conta.</p>
+            <div class="form-group">
+                <label data-i18n="email_cadastrado">📧 E-mail</label>
+                <input type="email" id="recuperar-email" data-i18n-placeholder="placeholder_email" placeholder="seu@email.com">
+            </div>
+            <button class="warning" onclick="enviarLinkRecuperacao()" data-i18n="btn_enviar_link">Enviar Link 📧</button>
+            <br>
+            <span class="link-trocar" onclick="mostrarLogin()" data-i18n="voltar_login">⬅ Voltar ao Login</span>
+        </div>
+
+        <!-- ===== TELA LINK E-MAIL ===== -->
+        <div id="tela-link-email" class="tela-inicial hidden">
+            <h1 class="titulo-principal" data-i18n="titulo_app">Animal Game</h1>
+            <p class="subtitulo" data-i18n="verifique_email">📬 Verifique seu e-mail</p>
+            <div id="mensagem-link" class="mensagem-auth info hidden"></div>
+
+            <div class="caixa-email">
+                <div class="email-header">
+                    <span class="icone-email">📧</span>
+                    <div class="info-email">
+                        <div class="remetente" data-i18n="titulo_app">Animal Game</div>
+                        <div class="assunto" id="email-destinatario">Para: --</div>
+                    </div>
+                </div>
+                <div class="email-corpo">
+                    <p><strong data-i18n="ola">Olá!</strong></p>
+                    <p data-i18n="recebemos_solicitacao">Recebemos uma solicitação para redefinir sua senha.</p>
+                    <p data-i18n="clique_abaixo">Clique abaixo:</p>
+                </div>
+                <button class="btn-link-email" onclick="abrirNovaSenha()" data-i18n="btn_redefinir">🔓 Redefinir Minha Senha</button>
+                <p class="info-link-aviso" data-i18n="ignorar_email">⚠️ Se não solicitou, ignore.</p>
+            </div>
+            <span class="link-trocar" onclick="mostrarLogin()" data-i18n="voltar_login">⬅ Voltar ao Login</span>
+        </div>
+
+        <!-- ===== TELA NOVA SENHA ===== -->
+        <div id="tela-nova-senha" class="tela-inicial hidden">
+            <h1 class="titulo-principal" data-i18n="titulo_app">Animal Game</h1>
+            <p class="subtitulo" data-i18n="nova_senha_titulo">🔐 Nova Senha</p>
+            <div id="mensagem-nova-senha" class="mensagem-auth hidden"></div>
+            <p class="texto-informativo" id="texto-nova-senha">Digite sua nova senha:</p>
+            <div class="form-group">
+                <label data-i18n="nova_senha_label">🔑 Nova Senha</label>
+                <input type="password" id="nova-senha" placeholder="00000000" maxlength="8" inputmode="numeric">
+            </div>
+            <div class="form-group">
+                <label data-i18n="confirmar_senha_label">🔑 Confirmar</label>
+                <input type="password" id="confirmar-nova-senha" placeholder="00000000" maxlength="8" inputmode="numeric">
+            </div>
+            <button onclick="salvarNovaSenha()" data-i18n="btn_salvar_senha">Salvar ✅</button>
+            <br>
+            <span class="link-trocar" onclick="mostrarLogin()" data-i18n="cancelar">⬅ Cancelar</span>
+        </div>
+
+        <!-- ===== TELA SOBRE ===== -->
+        <div id="tela-sobre" class="hidden">
+            <h2 data-i18n="sobre_titulo">ℹ️ Sobre o Animal Game</h2>
+            <p class="subtitulo-sobre">Horários, prêmios e dias</p>
+
+            <div class="sobre-secao dias">
+                <h3 data-i18n="dias_func">📅 Dias de Funcionamento</h3>
+                <div class="info-linha"><span class="label-sobre" data-i18n="seg_sex">Seg-Sex</span><span class="valor-sobre" data-i18n="tres_turnos">3 turnos</span></div>
+                <div class="info-linha"><span class="label-sobre" data-i18n="sabado">Sábado</span><span class="valor-sobre" data-i18n="dois_turnos">2 turnos</span></div>
+                <div class="info-linha"><span class="label-sobre" data-i18n="domingo">Domingo</span><span class="valor-sobre" style="color:#e74c3c;" data-i18n="fechado_dom">Fechado</span></div>
+            </div>
+
+            <div class="sobre-secao turno-manha">
+                <h3 data-i18n="sobre_turno_manha">🌅 Manhã</h3>
+                <div class="info-linha"><span class="label-sobre" data-i18n="apostas_label">Apostas</span><span class="valor-sobre tempo">08h - 11h59</span></div>
+                <div class="info-linha"><span class="label-sobre" data-i18n="resultado_label">Resultado</span><span class="valor-sobre tempo">12h00</span></div>
+                <div class="info-linha"><span class="label-sobre" data-i18n="premios_label">Prêmios</span><span class="valor-sobre moedas">50/75/100</span></div>
+            </div>
+
+            <div class="sobre-secao turno-tarde">
+                <h3 data-i18n="sobre_turno_tarde">☀️ Tarde</h3>
+                <div class="info-linha"><span class="label-sobre" data-i18n="apostas_label">Apostas</span><span class="valor-sobre tempo">13h - 16h59</span></div>
+                <div class="info-linha"><span class="label-sobre" data-i18n="resultado_label">Resultado</span><span class="valor-sobre tempo">17h00</span></div>
+                <div class="info-linha"><span class="label-sobre" data-i18n="premios_label">Prêmios</span><span class="valor-sobre moedas">50/75/100</span></div>
+            </div>
+
+            <div class="sobre-secao turno-noite">
+                <h3 data-i18n="sobre_turno_noite">🌙 Noite (Seg-Sex)</h3>
+                <div class="info-linha"><span class="label-sobre" data-i18n="apostas_label">Apostas</span><span class="valor-sobre tempo">18h - 19h59</span></div>
+                <div class="info-linha"><span class="label-sobre" data-i18n="resultado_label">Resultado</span><span class="valor-sobre tempo">20h00</span></div>
+                <div class="info-linha"><span class="label-sobre" data-i18n="premios_label">Prêmios</span><span class="valor-sobre moedas">100/200/500</span></div>
+            </div>
+
+            <div class="sobre-secao">
+                <h3 data-i18n="novos_recursos">🎮 Novos Recursos</h3>
+                <p>• ⭐ Sistema de níveis e XP</p>
+                <p>• 🎯 Missões diárias</p>
+                <p>• 🎁 Bônus de login diário</p>
+                <p>• 🏅 Conquistas</p>
+                <p>• 🏪 Loja de itens</p>
+                <p>• 📊 Estatísticas com gráficos</p>
+                <p>• 🔥 Multiplicador de sequência</p>
+                <p>• 🎰 Sorteio animado</p>
+            </div>
+
+            <div class="aviso-academico">
+                <span class="icone-grande">🎓</span>
+                <strong data-i18n="projeto_academico">Projeto Acadêmico</strong><br>
+                <span data-i18n="fins_educacionais">Fins exclusivamente educacionais.</span>
+            </div>
+
+            <button class="btn-voltar-sobre" onclick="fecharSobre()" data-i18n="voltar">⬅ Voltar</button>
+        </div>
+
+        <!-- ===== TELA RANKING ===== -->
+        <div id="tela-ranking" class="painel-apostas hidden">
+            <div class="painel-header">
+                <h2 data-i18n="ranking_titulo">🏆 Ranking</h2>
+                <button class="danger small" onclick="fecharRanking()">✖ Fechar</button>
+            </div>
+            <div class="abas" style="margin-bottom: 15px;">
+                <button class="aba ativa" id="aba-rank-geral" onclick="mudarAbaRank('geral')" data-i18n="geral">🌍 Geral</button>
+                <button class="aba" id="aba-rank-semanal" onclick="mudarAbaRank('semanal')" data-i18n="semanal">📅 Semanal</button>
+                <button class="aba" id="aba-rank-amigos" onclick="mudarAbaRank('amigos')" data-i18n="amigos">👥 Amigos</button>
+            </div>
+            <div id="lista-ranking"></div>
+        </div>
+
+        <!-- ===== TELA JOGO ===== -->
+        <div id="tela-jogo" class="hidden">
+            <div class="top-bar">
+                <h1 id="saudacao"></h1>
+                <div class="botoes">
+                    <div class="moedas-box" id="moedas-box" data-i18n-title="suas_moedas" title="Suas moedas">
+                        <span class="moeda-emoji">🪙</span>
+                        <span id="moedas-total">0</span>
+                    </div>
+                    <div class="xp-box" id="xp-box" data-i18n-title="seu_nivel" title="Seu nível e XP">
+                        <span id="nivel-emoji">🥉</span>
+                        <span id="nivel-nome">Bronze</span>
+                    </div>
+                    <!-- ✅ SININHO DE NOTIFICAÇÕES -->
+                    <button class="icon" id="btn-sininho" onclick="togglePainelNotificacoes()" title="Notificações" style="position:relative;">
+                        🔔
+                        <span id="badge-notificacoes" class="badge-notif hidden">0</span>
+                    </button>
+                    <button class="icon" onclick="mostrarPerfil()" data-i18n-title="perfil" title="Ver Perfil" id="btn-perfil">👤</button>
+                    <button class="icon" onclick="mostrarMissoes()" data-i18n-title="missoes" title="Missões Diárias" id="btn-missoes">🎯</button>
+                    <button class="icon" onclick="mostrarConquistas()" data-i18n-title="conquistas" title="Conquistas" id="btn-conquistas">🏅</button>
+                    <button class="icon" onclick="mostrarLoja()" data-i18n-title="loja" title="Loja de Itens" id="btn-loja">🏪</button>
+                    <button class="icon" onclick="mostrarSobre()" data-i18n-title="sobre" title="Sobre o Jogo">ℹ️</button>
+                    <button class="icon" id="btn-som" onclick="toggleSom()" data-i18n-title="som" title="Ligar/Desligar Som">🔊</button>
+                    <button class="icon" id="btn-idioma" onclick="abrirSeletorIdioma()" title="Idioma / Language">🇧🇷</button>
+                    <button class="purple small" onclick="mostrarRanking()" data-i18n-title="ranking" title="Ver Ranking">🏆</button>
+                    <button class="icon" onclick="abrirAdicionarAmigo()" title="Adicionar Amigo" id="btn-amigo">👥</button>
+                    <button class="secondary small" onclick="mostrarPainelApostas()" data-i18n-title="minhas_apostas" title="Minhas Apostas">📋</button>
+                    <button class="danger small" onclick="fazerLogout()" data-i18n-title="sair" title="Sair da Conta">🚪</button>
+                </div>
+                <!-- ✅ PAINEL DE NOTIFICAÇÕES -->
+                    <div id="painel-notificacoes" class="painel-notificacoes hidden">
+                        <div class="painel-notif-header">
+                            <h3>🔔 Notificações</h3>
+                            <div class="painel-notif-actions">
+                                <button class="small secondary" onclick="marcarTodasComoLidas()" title="Marcar todas como lidas">✅</button>
+                                <button class="small danger" onclick="limparNotificacoes()" title="Limpar tudo">🗑️</button>
+                                <button class="small gold" onclick="togglePainelNotificacoes()" title="Fechar">✖</button>
+                            </div>
+                        </div>
+                        <div id="lista-notificacoes" class="lista-notificacoes"></div>
+                    </div>
+            </div>
+
+            <div class="xp-bar-container" id="xp-bar-container">
+                <div class="xp-bar-info">
+                    <span id="xp-texto">0 / 100 XP</span>
+                    <span id="xp-proximo-nivel">Próximo: 🥈 Prata</span>
+                </div>
+                <div class="xp-bar-bg">
+                    <div class="xp-bar-fill" id="xp-bar-fill" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="missoes-ativas" id="missoes-ativas"></div>
+
+            <div class="painel-turnos" id="painel-turnos"></div>
+
+            <div class="painel-apostas hidden" id="painel-apostas">
+                <div class="painel-header">
+                    <h2>📋 Minhas Apostas</h2>
+                    <button class="danger small" onclick="fecharPainelApostas()">✖ Fechar</button>
+                </div>
+                <div class="abas">
+                    <button class="aba ativa" id="aba-apostas" onclick="mudarAba('apostas')" data-i18n="apostas">🐾 Apostas</button>
+                    <button class="aba" id="aba-sorteios" onclick="mudarAba('sorteios')" data-i18n="sorteios">🎰 Sorteios</button>
+                    <button class="aba" id="aba-estatisticas" onclick="mudarAba('estatisticas')" data-i18n="estatisticas">📊 Estatísticas</button>
+                </div>
+                <div id="conteudo-apostas">
+                    <div id="estatisticas" class="estatisticas"></div>
+                    <div id="lista-apostas"></div>
+                </div>
+                <div id="conteudo-sorteios" class="hidden">
+                    <div id="lista-sorteios"></div>
+                </div>
+                <div id="conteudo-estatisticas" class="hidden">
+                    <div class="graficos-container">
+                        <div class="grafico-box">
+                            <h3 data-i18n="evolucao">📈 Evolução de Moedas</h3>
+                            <canvas id="grafico-evolucao"></canvas>
+                        </div>
+                        <div class="grafico-box">
+                            <h3 data-i18n="pizza">🥧 Apostas (Vitórias x Derrotas)</h3>
+                            <canvas id="grafico-pizza"></canvas>
+                        </div>
+                       
+                    </div>
+                </div>
+            </div>
+
+            <div id="conteudo-principal">
+                <div id="aviso-fechado" class="aviso-fechado hidden">
+                    <span class="icone" id="aviso-icone">🌙</span>
+                    <h2 id="aviso-titulo">Jogo Fechado</h2>
+                    <p id="aviso-texto"></p>
+                    <div class="info-dias">
+                        <p style="margin: 0;"><strong>📅 Horários:</strong></p>
+                        <p style="margin: 5px 0;">• Seg-Sex: 🌅 08-11h59 | ☀️ 13-16h59 | 🌙 18-19h59</p>
+                        <p style="margin: 5px 0;">• Sábado: 🌅 08-11h59 | ☀️ 13-16h59</p>
+                        <p style="margin: 5px 0;">• Domingo: Fechado 🚫</p>
+                    </div>
+                </div>
+
+                <div id="jogo-ativo">
+                    <div id="contador-box" class="contador-apostas hidden">
+                        <span data-i18n="apostas_turno">📊 Apostas no turno atual:</span>
+                        <span class="numero-apostas" id="contador-apostas">0 / 10</span>
+                    </div>
+
+                    <div id="etapa-escolha">
+                        <div class="numeros-sorte" id="numeros-sorte">
+                            <h3 data-i18n="numeros_sorte">⭐ Seus Números da Sorte</h3>
+                            <div class="numeros-sorte-grid" id="numeros-sorte-grid"></div>
+                            <button class="secondary small" onclick="abrirConfigNumerosSorte()" data-i18n="editar">⚙️ Editar</button>
+                        </div>
+                        <h2 data-i18n="escolha_bicho">👇 Escolha o seu animal:</h2>
+                        <div class="vitrine" id="vitrine"></div>
+                    </div>
+
+                    <div id="etapa-milhar" class="hidden">
+                        <h2 data-i18n="voce_escolheu">Você escolheu:</h2>
+                        <div class="bicho-selecionado" id="bicho-selecionado"></div>
+                        <h2 data-i18n="como_apostar">💰 Como quer apostar?</h2>
+                        <div class="opcao-aposta">
+                            <button class="opcao-btn ativo" id="opcao-bicho" onclick="escolherModo('bicho')" data-i18n="so_bicho">
+                                🎯 Só o Animal<small id="premio-bicho-txt"></small>
+                            </button>
+                            <button class="opcao-btn" id="opcao-bicho-milhar" onclick="escolherModo('bicho-milhar')" data-i18n="bicho_milhar">
+                                🎯💰 Animal + Milhar<small id="premio-milhar-txt"></small>
+                            </button>
+                        </div>
+                        <div id="area-milhar" class="hidden">
+                            <div class="aviso-milhar-livre">
+                                <span class="icone">💡</span>
+                                <div class="texto"><strong data-i18n="milhar_livre">A milhar é 100% livre!</strong><br><span data-i18n="milhar_livre_desc">Escolha qualquer número de 0000 a 9999.</span></div>
+                            </div>
+                            <div class="milhar-manual">
+                                <label data-i18n="digite_milhar">🔢 Digite a milhar desejada:</label>
+                                <div class="input-group">
+                                    <input type="text" id="input-milhar-manual" placeholder="0000" maxlength="4" inputmode="numeric">
+                                    <button onclick="confirmarMilharManual()" data-i18n="confirmar">Confirmar</button>
+                                </div>
+                                <div id="erro-milhar" class="erro hidden"></div>
+                            </div>
+                        </div>
+                        <div id="area-sem-milhar" class="hidden">
+                            <button class="btn-sem-milhar" onclick="apostarSoBicho()" data-i18n="apostar_bicho">Apostar só no Animal 🎯</button>
+                        </div>
+                        <br>
+                        <button class="secondary" onclick="voltarEscolhaBicho()" data-i18n="trocar_bicho">⬅ Trocar Animal</button>
+                    </div>
+
+                    <div id="etapa-confirmacao" class="hidden">
+                        <div class="card" id="card-aposta"></div>
+                        <p><strong>Confirmar esta aposta?</strong></p>
+                        <button class="warning pulse" onclick="confirmarAposta()" data-i18n="confirmar_aposta">✅ Confirmar</button>
+                        <button class="secondary" onclick="fazerOutraAposta()" data-i18n="cancelar_aposta">❌ Cancelar</button>
+                    </div>
+
+                    <div id="etapa-aposta-registrada" class="hidden">
+                        <div class="aviso-aguardando">
+                            <span class="relogio">⏳</span>
+                            <h2 data-i18n="aposta_registrada">Sua aposta foi registrada!</h2>
+                            <p data-i18n="vai_concorrer">Vai concorrer no sorteio:</p>
+                            <div class="horario-sorteio" id="horario-sorteio-aposta">--</div>
+                        </div>
+                        <button class="gold" onclick="fazerOutraAposta()" data-i18n="nova_aposta">Fazer Nova Aposta 🔄</button>
+                        <button class="secondary" onclick="mostrarPainelApostas()" data-i18n="ver_apostas">📋 Ver Minhas Apostas</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RODAPÉ -->
+        <div class="rodape">
+            <span class="marca">Animal Game</span> &nbsp;|&nbsp; ES@2026
+        </div>
+    </div>
+
+    <!-- ===== SCRIPTS ===== -->
+        <script src="idiomas.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // ✅ Aguarda tudo carregar ANTES de fazer qualquer coisa
+        window.addEventListener("load", function(){
+            // ✅ Atualiza botão do idioma (bandeira)
+            if(typeof atualizarBotaoIdioma === "function"){
+                atualizarBotaoIdioma();
+            }
+
+            // ✅ Verifica se o aviso legal deve aparecer
+            let avisoAberto = false;
+            if(typeof checarAvisoLegal === "function"){
+                avisoAberto = !checarAvisoLegal();
+            }
+
+            // ✅ Só aplica tradução se o aviso NÃO estiver aberto
+            if(!avisoAberto && typeof idiomaAtual !== "undefined" && idiomaAtual !== "pt"){
+                setTimeout(function(){
+                    if(typeof aplicarIdioma === "function") aplicarIdioma();
+                }, 400);
+            }
+        });
+
+        // Registra o service worker (PWA)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(() => {});
+        }
+    </script>
+
+    <!-- ===== TELA LGPD ===== -->
+<div id="tela-lgpd" class="hidden">
+    <h2>🔒 Política de Privacidade (LGPD)</h2>
+    <p>Este projeto está em conformidade com a <strong>Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018)</strong>.</p>
+
+    <h3>📊 Quais dados coletamos</h3>
+    <ul>
+        <li>Nickname (apelido escolhido por você)</li>
+        <li>E-mail (para recuperação de senha e login)</li>
+        <li>Senha (criptografada com hash)</li>
+        <li>Histórico de apostas, moedas, XP, conquistas e amigos</li>
+        <li>Data e hora de último acesso</li>
+    </ul>
+
+    <h3>🎯 Como usamos seus dados</h3>
+    <ul>
+        <li>Para permitir o login e uso do jogo</li>
+        <li>Para salvar seu progresso e histórico</li>
+        <li>Para exibir seu nickname no ranking e para amigos</li>
+        <li>Para enviar notificações internas do jogo</li>
+    </ul>
+    <p><strong>Não compartilhamos seus dados com terceiros.</strong> Não usamos cookies de rastreamento. Todos os dados ficam armazenados localmente no seu navegador (localStorage).</p>
+
+    <h3>🗑️ Como apagar seus dados</h3>
+    <p>Você pode, a qualquer momento, <strong>deletar sua conta e todos os dados associados</strong> indo em: <em>Perfil → 🗑️ Deletar Conta</em>.</p>
+    <p>Também pode limpar manualmente em: Configurações do Navegador → Limpar dados de navegação.</p>
+
+    <h3>👶 Idade</h3>
+    <p>Este é um projeto <strong>acadêmico e educacional</strong>, apropriado para todas as faixas etárias. Não envolve dinheiro real.</p>
+
+    <button class="btn-voltar-lgpd" onclick="voltarParaInicio()">⬅ Voltar</button>
+</div>
+
+<!-- ===== TELA TERMOS ===== -->
+<div id="tela-termos" class="hidden">
+    <h2>📜 Termos de Uso</h2>
+
+    <h3>1. Natureza do projeto</h3>
+    <p>Este site é um <strong>projeto acadêmico de estudo de programação web</strong>. Não é um site de apostas reais. Não envolve dinheiro, não incentiva apostas reais e não deve ser usado para qualquer tipo de aposta.</p>
+
+    <h3>2. Moedas fictícias</h3>
+    <p>Todas as "moedas", "XP", "níveis" e recompensas são <strong>100% fictícios</strong> e não têm valor real. Não podem ser trocados por dinheiro, bens ou serviços.</p>
+
+    <h3>3. Uso adequado</h3>
+    <ul>
+        <li>Não utilize nicknames ofensivos ou inapropriados</li>
+        <li>Não tente burlar o sistema ou hackear</li>
+        <li>Não compartilhe sua senha com outras pessoas</li>
+        <li>Não use o site para atividades ilegais</li>
+    </ul>
+
+    <h3>4. Privacidade</h3>
+    <p>Veja nossa <strong>Política de Privacidade (LGPD)</strong> para saber quais dados coletamos e como apagá-los.</p>
+
+    <h3>5. Responsabilidade</h3>
+    <p>Este é um projeto <strong>sem fins lucrativos</strong> e <strong>sem garantias</strong>. O serviço pode sair do ar, ter bugs ou ser modificado a qualquer momento, sem aviso prévio.</p>
+
+    <h3>6. Idade</h3>
+    <p>Projeto apropriado para <strong>todas as faixas etárias</strong>, pois é uma simulação sem valor real.</p>
+
+    <button class="btn-voltar-lgpd" onclick="voltarParaInicio()">⬅ Voltar</button>
+</div>
+
+<!-- ===== RODAPÉ FIXO ===== -->
+<div class="rodape-fixo">
+    <button onclick="abrirLGPD()">🔒 Privacidade (LGPD)</button>
+    <span class="separador">•</span>
+    <button onclick="abrirTermos()">📜 Termos de Uso</button>
+    <span class="separador">•</span>
+    <span style="color:#95a5a6;font-size:11px;">🎓 Projeto acadêmico sem fins lucrativos</span>
+</div>
+
+</body>
+</html>
